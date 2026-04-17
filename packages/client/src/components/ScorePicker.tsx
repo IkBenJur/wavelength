@@ -47,10 +47,6 @@ export default function ScorePicker({ prompt, assignedScore, onReady }: Props) {
           ))}
         </div>
 
-        <div className="flex justify-between text-xs text-slate-600 px-1">
-          <span>1 = {prompt.negative}</span>
-          <span>{prompt.positive} = 10</span>
-        </div>
       </div>
 
       <button
