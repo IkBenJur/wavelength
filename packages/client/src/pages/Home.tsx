@@ -48,26 +48,24 @@ export default function Home({ onJoin, error, connected }: Props) {
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Room code</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={roomId}
-                onChange={(e) => setRoomId(e.target.value.toUpperCase())}
-                placeholder="e.g. ABC123"
-                maxLength={10}
-                className="flex-1 bg-white/10 text-white placeholder-slate-500 rounded-xl px-4 py-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-violet-500 font-mono uppercase tracking-widest"
-              />
+            <input
+              type="text"
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+              placeholder="e.g. ABC123"
+              maxLength={10}
+              className="w-full bg-white/10 text-white placeholder-slate-500 rounded-xl px-4 py-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-violet-500 font-mono uppercase tracking-widest"
+            />
+            <div className="flex items-center justify-between mt-1.5">
+              <p className="text-xs text-slate-500">Share this code with your partner to play together.</p>
               <button
                 type="button"
                 onClick={() => setRoomId(randomRoomId())}
-                className="px-4 py-3 rounded-xl bg-white/10 text-slate-300 hover:bg-white/20 border border-white/10 text-sm font-medium transition-colors"
+                className="text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors shrink-0 ml-3"
               >
-                Random
+                Generate random
               </button>
             </div>
-            <p className="text-xs text-slate-500 mt-1.5">
-              Share this code with your partner to play together.
-            </p>
           </div>
 
           {error && (
