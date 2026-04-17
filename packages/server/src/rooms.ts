@@ -11,7 +11,8 @@ export type Phase = 'waiting' | 'scoring' | 'guessing' | 'reveal' | 'gameover';
 export interface Room {
   id: string;
   players: [Player | null, Player | null];
-  scores: [number, number];
+  score: number;
+  maxPossible: number;
   round: number;
   phase: Phase;
   scorerIndex: 0 | 1;
@@ -27,7 +28,8 @@ export interface Room {
 export interface SerializedRoom {
   id: string;
   players: (Player | null)[];
-  scores: [number, number];
+  score: number;
+  maxPossible: number;
   round: number;
   phase: Phase;
   scorerIndex: 0 | 1;
@@ -45,7 +47,8 @@ function createRoom(id: string): Room {
   return {
     id,
     players: [null, null],
-    scores: [0, 0],
+    score: 0,
+    maxPossible: 0,
     round: 0,
     phase: 'waiting',
     scorerIndex: 0,
@@ -149,7 +152,8 @@ export function submitGuess(
   const points = computePoints(room.lockedScore!, guess);
   room.lastGuess = guess;
   room.lastPoints = points;
-  room.scores[guesserIndex] += points;
+  room.score += points;
+  room.maxPossible += 10;
   room.phase = 'reveal';
   room.lastActivity = Date.now();
   return room;
@@ -191,7 +195,8 @@ export function serializeRoom(room: Room, myPlayerIndex: 0 | 1): SerializedRoom 
   return {
     id: room.id,
     players: room.players,
-    scores: room.scores,
+    score: room.score,
+    maxPossible: room.maxPossible,
     round: room.round,
     phase: room.phase,
     scorerIndex: room.scorerIndex,

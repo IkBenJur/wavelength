@@ -13,7 +13,9 @@
       "Bash(git push *)",
       "Bash(fuser -k 5173/tcp 3000/tcp)",
       "Bash(gh auth *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(npx tsx *)",
+      "Bash(npx vite *)"
     ]
   }
 }

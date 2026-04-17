@@ -39,9 +39,8 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
 
         {phase !== 'waiting' && phase !== 'gameover' && (
           <Scoreboard
-            players={players}
-            scores={room.scores}
-            myIndex={myPlayerIndex}
+            score={room.score}
+            maxPossible={room.maxPossible}
             round={room.round}
           />
         )}
@@ -96,7 +95,7 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
                   {room.lastPoints !== null ? pointsLabel[room.lastPoints] ?? '' : ''}
                 </p>
                 <p className="text-violet-300 text-lg font-semibold">
-                  +{room.lastPoints} point{room.lastPoints !== 1 ? 's' : ''} for {guesser?.name}
+                  +{room.lastPoints} point{room.lastPoints !== 1 ? 's' : ''} — {room.score} / {room.maxPossible} total
                 </p>
               </div>
 
@@ -167,28 +166,20 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
           {phase === 'gameover' && (
             <div className="text-center space-y-6 py-4">
               <p className="text-slate-400 text-sm uppercase tracking-widest font-medium">Game Over</p>
-              <div className="space-y-3">
-                {([0, 1] as const)
-                  .sort((a, b) => room.scores[b] - room.scores[a])
-                  .map((i, rank) => (
-                    <div
-                      key={i}
-                      className={`flex items-center justify-between px-5 py-4 rounded-xl border ${
-                        rank === 0
-                          ? 'bg-violet-500/20 border-violet-500/40'
-                          : 'bg-white/5 border-white/10'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{rank === 0 ? '🏆' : '🥈'}</span>
-                        <span className="text-white font-semibold">
-                          {players[i]?.name}
-                          {i === myPlayerIndex && <span className="text-violet-400 ml-1">(you)</span>}
-                        </span>
-                      </div>
-                      <span className="text-3xl font-black text-white">{room.scores[i]}</span>
-                    </div>
-                  ))}
+              <div className="space-y-2">
+                <div className="text-6xl font-black text-white">
+                  {room.score}
+                  <span className="text-slate-500 text-3xl font-medium"> / {room.maxPossible}</span>
+                </div>
+                <p className="text-slate-400 text-sm">
+                  {room.maxPossible > 0 ? Math.round((room.score / room.maxPossible) * 100) : 0}% accuracy over {room.round} round{room.round !== 1 ? 's' : ''}
+                </p>
+              </div>
+              <div className="h-3 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-violet-500"
+                  style={{ width: `${room.maxPossible > 0 ? Math.round((room.score / room.maxPossible) * 100) : 0}%` }}
+                />
               </div>
               <button
                 onClick={() => window.location.reload()}

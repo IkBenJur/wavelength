@@ -15,7 +15,8 @@ export type Phase = 'waiting' | 'scoring' | 'guessing' | 'reveal' | 'gameover';
 export interface RoomState {
   id: string;
   players: (Player | null)[];
-  scores: [number, number];
+  score: number;
+  maxPossible: number;
   round: number;
   phase: Phase;
   scorerIndex: 0 | 1;
