@@ -10,6 +10,7 @@ interface Props {
   onSubmitGuess: (guess: number) => void;
   onNextRound: () => void;
   onEndGame: () => void;
+  onLeaveGame: () => void;
 }
 
 const pointsLabel: Record<number, string> = {
@@ -20,7 +21,7 @@ const pointsLabel: Record<number, string> = {
   0: 'Way off',
 };
 
-export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, onEndGame }: Props) {
+export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, onEndGame, onLeaveGame }: Props) {
   const { phase, scorerIndex, myPlayerIndex, players, currentPrompt } = room;
   const isScorer = myPlayerIndex === scorerIndex;
   const guesserIndex: 0 | 1 = scorerIndex === 0 ? 1 : 0;
@@ -190,10 +191,10 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
                 />
               </div>
               <button
-                onClick={() => window.location.reload()}
+                onClick={onLeaveGame}
                 className="w-full py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold transition-colors"
               >
-                Play Again
+                Back to Home
               </button>
             </div>
           )}

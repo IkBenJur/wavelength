@@ -67,6 +67,7 @@ export interface UseRoomReturn {
   submitGuess: (guess: number) => void;
   nextRound: () => void;
   endGame: () => void;
+  leaveGame: () => void;
   clearError: () => void;
 }
 
@@ -142,6 +143,13 @@ export function useRoom(): UseRoomReturn {
     send('END_GAME');
   }, [send]);
 
+  const leaveGame = useCallback(() => {
+    clearSession();
+    sessionRef.current = null;
+    send('LEAVE_ROOM');
+    setRoom(null);
+  }, [send]);
+
   return {
     room,
     error,
@@ -152,5 +160,6 @@ export function useRoom(): UseRoomReturn {
     submitGuess: (guess) => send('SUBMIT_GUESS', { guess }),
     nextRound: () => send('NEXT_ROUND'),
     endGame: endGameAndClear,
+    leaveGame,
   };
 }

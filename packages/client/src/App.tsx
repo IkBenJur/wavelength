@@ -3,7 +3,7 @@ import Home from './pages/Home';
 import Room from './pages/Room';
 
 export default function App() {
-  const { room, error, connected, clearError, join, lockScore, submitGuess, nextRound, endGame } =
+  const { room, error, connected, clearError, join, lockScore, submitGuess, nextRound, endGame, leaveGame } =
     useRoom();
 
   if (!room) {
@@ -17,6 +17,7 @@ export default function App() {
       onSubmitGuess={submitGuess}
       onNextRound={nextRound}
       onEndGame={endGame}
+      onLeaveGame={leaveGame}
     />
   );
 }
