@@ -4,6 +4,15 @@ import { computePoints } from './game';
 export interface Player {
   id: string;
   name: string;
+  sessionToken: string;
+  connected: boolean;
+  disconnectedAt: number | null;
+}
+
+export interface SerializedPlayer {
+  id: string;
+  name: string;
+  connected: boolean;
 }
 
 export type Phase = 'waiting' | 'scoring' | 'guessing' | 'reveal' | 'gameover';
@@ -27,7 +36,7 @@ export interface Room {
 
 export interface SerializedRoom {
   id: string;
-  players: (Player | null)[];
+  players: (SerializedPlayer | null)[];
   score: number;
   maxPossible: number;
   round: number;
@@ -80,17 +89,29 @@ function startNewRound(room: Room): void {
   room.lastActivity = Date.now();
 }
 
+export function tryReconnect(
+  roomId: string,
+  sessionToken: string
+): { room: Room; playerId: string; playerIndex: 0 | 1 } | null {
+  const room = rooms.get(roomId);
+  if (!room) return null;
+
+  const idx = room.players.findIndex((p) => p?.sessionToken === sessionToken);
+  if (idx === -1) return null;
+
+  const player = room.players[idx]!;
+  player.connected = true;
+  player.disconnectedAt = null;
+  room.lastActivity = Date.now();
+
+  return { room, playerId: player.id, playerIndex: idx as 0 | 1 };
+}
+
 export function joinRoom(
   roomId: string,
   player: Player
-): { room: Room; playerIndex: 0 | 1} | { error: string } {
+): { room: Room; playerIndex: 0 | 1 } | { error: string } {
   const room = getOrCreate(roomId);
-
-  const existingIndex = room.players.findIndex((p) => p?.id === player.id);
-  if (existingIndex !== -1) {
-    room.lastActivity = Date.now();
-    return { room, playerIndex: existingIndex as 0 | 1 };
-  }
 
   const slotIndex = room.players.findIndex((p) => p === null);
   if (slotIndex === -1) return { error: 'Room is full' };
@@ -103,6 +124,42 @@ export function joinRoom(
   }
 
   return { room, playerIndex: slotIndex as 0 | 1 };
+}
+
+export function disconnectPlayer(roomId: string, playerId: string): Room | null {
+  const room = rooms.get(roomId);
+  if (!room) return null;
+
+  const idx = room.players.findIndex((p) => p?.id === playerId);
+  if (idx === -1) return room;
+
+  const player = room.players[idx]!;
+  player.connected = false;
+  player.disconnectedAt = Date.now();
+  room.lastActivity = Date.now();
+
+  return room;
+}
+
+export function removeDisconnectedPlayer(roomId: string, playerId: string): Room | null {
+  const room = rooms.get(roomId);
+  if (!room) return null;
+
+  const idx = room.players.findIndex((p) => p?.id === playerId);
+  if (idx === -1) return null;
+
+  const player = room.players[idx]!;
+  if (player.connected) return null; // reconnected in time — do nothing
+
+  room.players[idx as 0 | 1] = null;
+  if (room.phase !== 'gameover') room.phase = 'waiting';
+
+  if (room.players[0] === null && room.players[1] === null) {
+    rooms.delete(roomId);
+    return null;
+  }
+
+  return room;
 }
 
 export function leaveRoom(roomId: string, playerId: string): Room | null {
@@ -194,7 +251,9 @@ export function serializeRoom(room: Room, myPlayerIndex: 0 | 1): SerializedRoom 
 
   return {
     id: room.id,
-    players: room.players,
+    players: room.players.map((p) =>
+      p ? { id: p.id, name: p.name, connected: p.connected } : null
+    ),
     score: room.score,
     maxPossible: room.maxPossible,
     round: room.round,

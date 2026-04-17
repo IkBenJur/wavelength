@@ -27,6 +27,8 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
   const scorer = players[scorerIndex];
   const guesser = players[guesserIndex];
   const myReadyForNext = room.nextRoundReady.includes(myPlayerIndex);
+  const partnerIndex: 0 | 1 = myPlayerIndex === 0 ? 1 : 0;
+  const partnerDisconnected = players[partnerIndex] !== null && !players[partnerIndex]?.connected;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 flex items-center justify-center p-4">
@@ -43,6 +45,12 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
             maxPossible={room.maxPossible}
             round={room.round}
           />
+        )}
+
+        {partnerDisconnected && (
+          <div className="mb-4 px-4 py-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 text-sm text-center">
+            {players[partnerIndex]?.name} disconnected — waiting for them to reconnect…
+          </div>
         )}
 
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 shadow-2xl">

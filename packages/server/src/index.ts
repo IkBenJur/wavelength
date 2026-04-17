@@ -11,10 +11,14 @@ import {
   readyForNextRound,
   endGame,
   serializeRoom,
+  disconnectPlayer,
+  removeDisconnectedPlayer,
+  tryReconnect,
   Room,
 } from './rooms';
 
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
+const RECONNECT_GRACE_MS = 180_000;
 
 const app = express();
 const server = http.createServer(app);
@@ -56,14 +60,31 @@ wss.on('connection', (ws) => {
     if (type === 'JOIN_ROOM') {
       const roomId = (payload?.roomId ?? '').trim().toUpperCase();
       const playerName = (payload?.playerName ?? '').trim();
+      const sessionToken = (payload?.sessionToken ?? '').trim();
 
       if (!roomId || !playerName) {
         send(ws, 'ERROR', { message: 'Room code and name are required' });
         return;
       }
 
+      // Try to restore an existing session first
+      if (sessionToken) {
+        const reconnect = tryReconnect(roomId, sessionToken);
+        if (reconnect) {
+          clients.set(ws, { playerId: reconnect.playerId, playerIndex: reconnect.playerIndex, roomId });
+          broadcast(roomId, 'ROOM_STATE', reconnect.room);
+          return;
+        }
+      }
+
       const playerId = nanoid(8);
-      const result = joinRoom(roomId, { id: playerId, name: playerName });
+      const result = joinRoom(roomId, {
+        id: playerId,
+        name: playerName,
+        sessionToken: sessionToken || nanoid(16),
+        connected: true,
+        disconnectedAt: null,
+      });
 
       if ('error' in result) {
         send(ws, 'ERROR', { message: result.error });
@@ -121,9 +142,16 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     const info = clients.get(ws);
     if (!info) return;
-    const result = leaveRoom(info.roomId, info.playerId);
     clients.delete(ws);
-    if (result) broadcast(info.roomId, 'ROOM_STATE', result);
+
+    const disconnected = disconnectPlayer(info.roomId, info.playerId);
+    if (disconnected) broadcast(info.roomId, 'ROOM_STATE', disconnected);
+
+    // Remove the player from the room after the grace period if they haven't reconnected
+    setTimeout(() => {
+      const result = removeDisconnectedPlayer(info.roomId, info.playerId);
+      if (result) broadcast(info.roomId, 'ROOM_STATE', result);
+    }, RECONNECT_GRACE_MS);
   });
 });
 
