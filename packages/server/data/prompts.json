@@ -1,0 +1,10 @@
+[
+  { "negative": "Not attractive in a person",       "positive": "Very attractive in a person" },
+  { "negative": "A terrible first date idea",       "positive": "A great first date idea" },
+  { "negative": "A major red flag",                 "positive": "A total green flag" },
+  { "negative": "Not worth spending money on",      "positive": "Absolutely worth spending money on" },
+  { "negative": "A reason to go to bed early",      "positive": "A reason to stay up all night" },
+  { "negative": "A quality you hate in a friend",   "positive": "A quality you love in a best friend" },
+  { "negative": "A very unappealing hobby",         "positive": "A very attractive hobby" },
+  { "negative": "The worst thing to say on a date", "positive": "The best thing to say on a date" }
+]
