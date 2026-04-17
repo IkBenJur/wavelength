@@ -6,7 +6,7 @@ import GuessPicker from '../components/GuessPicker';
 
 interface Props {
   room: RoomState;
-  onLockScore: (score: number) => void;
+  onLockScore: () => void;
   onSubmitGuess: (guess: number) => void;
   onNextRound: () => void;
   onEndGame: () => void;
@@ -51,7 +51,7 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
 
           {phase === 'scoring' && currentPrompt && (
             isScorer ? (
-              <ScorePicker prompt={currentPrompt} onLock={onLockScore} />
+              <ScorePicker prompt={currentPrompt} assignedScore={room.lockedScore!} onReady={onLockScore} />
             ) : (
               <div className="text-center py-12 space-y-4">
                 <div className="w-12 h-12 rounded-full border-4 border-violet-500 border-t-transparent animate-spin mx-auto" />

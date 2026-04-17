@@ -32,7 +32,7 @@ export interface UseRoomReturn {
   error: string | null;
   connected: boolean;
   join: (roomId: string, playerName: string) => void;
-  lockScore: (score: number) => void;
+  lockScore: () => void;
   submitGuess: (guess: number) => void;
   nextRound: () => void;
   endGame: () => void;
@@ -71,7 +71,7 @@ export function useRoom(): UseRoomReturn {
     connected,
     clearError: () => setError(null),
     join: (roomId, playerName) => send('JOIN_ROOM', { roomId, playerName }),
-    lockScore: (score) => send('LOCK_SCORE', { score }),
+    lockScore: () => send('LOCK_SCORE'),
     submitGuess: (guess) => send('SUBMIT_GUESS', { guess }),
     nextRound: () => send('NEXT_ROUND'),
     endGame: () => send('END_GAME'),

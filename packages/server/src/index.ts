@@ -84,7 +84,7 @@ wss.on('connection', (ws) => {
     const { playerId, roomId } = info;
 
     if (type === 'LOCK_SCORE') {
-      const result = lockScore(roomId, playerId, payload?.score);
+      const result = lockScore(roomId, playerId);
       if ('error' in result) { send(ws, 'ERROR', { message: result.error }); return; }
       broadcast(roomId, 'ROOM_STATE', result);
       return;

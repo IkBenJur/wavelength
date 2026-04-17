@@ -68,7 +68,7 @@ function startNewRound(room: Room): void {
   const { prompt, index } = getRandomPrompt(room.usedPromptIndices);
   room.usedPromptIndices.add(index);
   room.currentPrompt = prompt;
-  room.lockedScore = null;
+  room.lockedScore = Math.floor(Math.random() * 10) + 1;
   room.lastGuess = null;
   room.lastPoints = null;
   room.phase = 'scoring';
@@ -122,16 +122,13 @@ export function leaveRoom(roomId: string, playerId: string): Room | null {
 
 export function lockScore(
   roomId: string,
-  playerId: string,
-  score: number
+  playerId: string
 ): Room | { error: string } {
   const room = rooms.get(roomId);
   if (!room) return { error: 'Room not found' };
   if (room.phase !== 'scoring') return { error: 'Not in scoring phase' };
   if (room.players[room.scorerIndex]?.id !== playerId) return { error: 'Not your turn to score' };
-  if (score < 1 || score > 10) return { error: 'Score must be 1–10' };
 
-  room.lockedScore = score;
   room.phase = 'guessing';
   room.lastActivity = Date.now();
   return room;
@@ -199,7 +196,10 @@ export function serializeRoom(room: Room, myPlayerIndex: 0 | 1): SerializedRoom 
     phase: room.phase,
     scorerIndex: room.scorerIndex,
     currentPrompt: room.currentPrompt,
-    lockedScore: room.lockedScore,
+    lockedScore:
+      myPlayerIndex === room.scorerIndex || room.phase === 'reveal' || room.phase === 'gameover'
+        ? room.lockedScore
+        : null,
     lastGuess: room.lastGuess,
     lastPoints: room.lastPoints,
     nextRoundReady,

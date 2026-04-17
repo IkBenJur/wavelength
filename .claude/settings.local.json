@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(npm install *)",
+      "Bash(npx ts-node-dev *)",
+      "Bash(echo \"Server PID: $!\")",
+      "Bash(git -C /home/jur/programs/wavelength status)",
+      "Bash(git -C /home/jur/programs/wavelength remote -v)",
+      "Bash(gh repo *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}
