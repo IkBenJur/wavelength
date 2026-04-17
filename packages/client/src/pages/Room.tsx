@@ -53,11 +53,20 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
             isScorer ? (
               <ScorePicker prompt={currentPrompt} assignedScore={room.lockedScore!} onReady={onLockScore} />
             ) : (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-12 h-12 rounded-full border-4 border-violet-500 border-t-transparent animate-spin mx-auto" />
-                <p className="text-slate-300">
-                  <span className="text-violet-400 font-semibold">{scorer?.name}</span> is picking a score…
-                </p>
+              <div className="space-y-6">
+                <div className="text-center space-y-4">
+                  <div className="w-10 h-10 rounded-full border-4 border-violet-500 border-t-transparent animate-spin mx-auto" />
+                  <p className="text-slate-300">
+                    <span className="text-violet-400 font-semibold">{scorer?.name}</span> is thinking of a clue…
+                  </p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+                  <div className="flex justify-between items-center gap-4">
+                    <span className="text-red-400 font-semibold text-sm flex-1">{currentPrompt.negative}</span>
+                    <span className="text-slate-600 text-xs">↔</span>
+                    <span className="text-emerald-400 font-semibold text-sm flex-1 text-right">{currentPrompt.positive}</span>
+                  </div>
+                </div>
               </div>
             )
           )}

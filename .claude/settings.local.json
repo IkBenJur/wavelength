@@ -10,7 +10,10 @@
       "Bash(gh repo *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(fuser -k 5173/tcp 3000/tcp)",
+      "Bash(gh auth *)",
+      "Bash(git remote *)"
     ]
   }
 }
