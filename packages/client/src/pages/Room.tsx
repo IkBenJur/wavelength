@@ -55,7 +55,7 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
         )}
 
         <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 shadow-2xl">
-          {phase === 'waiting' && <WaitingScreen roomId={room.id} />}
+          {phase === 'waiting' && <WaitingScreen roomId={room.id} onLeave={onLeaveGame} />}
 
           {phase === 'scoring' && currentPrompt && (
             isScorer ? (
