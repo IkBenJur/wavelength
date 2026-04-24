@@ -83,12 +83,15 @@ export function useRoom(): UseRoomReturn {
   }, []);
 
   useEffect(() => {
+    let attempts = 0;
+
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        attempts = 0;
         setConnected(true);
         // Auto-rejoin if a session is stored
         const session = sessionRef.current;
@@ -102,9 +105,13 @@ export function useRoom(): UseRoomReturn {
 
       ws.onclose = () => {
         setConnected(false);
-        // Attempt to reconnect after 2s if we have a session
-        if (sessionRef.current) {
+        // Retry for up to 180 s (90 × 2 s) — after that the server room is gone
+        if (sessionRef.current && attempts++ < 90) {
           setTimeout(connect, 2000);
+        } else {
+          clearSession();
+          sessionRef.current = null;
+          setRoom(null);
         }
       };
 
