@@ -3,7 +3,7 @@ import Home from './pages/Home';
 import Room from './pages/Room';
 
 export default function App() {
-  const { room, error, connected, clearError, join, lockScore, submitGuess, nextRound, endGame, leaveGame } =
+  const { room, error, connected, hoverGuess, clearError, join, lockScore, submitGuess, sendHover, nextRound, endGame, leaveGame } =
     useRoom();
 
   if (!room) {
@@ -13,8 +13,10 @@ export default function App() {
   return (
     <Room
       room={room}
+      hoverGuess={hoverGuess}
       onLockScore={lockScore}
       onSubmitGuess={submitGuess}
+      onSendHover={sendHover}
       onNextRound={nextRound}
       onEndGame={endGame}
       onLeaveGame={leaveGame}

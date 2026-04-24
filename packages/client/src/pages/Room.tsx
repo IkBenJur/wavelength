@@ -6,8 +6,10 @@ import GuessPicker from '../components/GuessPicker';
 
 interface Props {
   room: RoomState;
+  hoverGuess: number | null;
   onLockScore: () => void;
   onSubmitGuess: (guess: number) => void;
+  onSendHover: (hover: number | null) => void;
   onNextRound: () => void;
   onEndGame: () => void;
   onLeaveGame: () => void;
@@ -21,7 +23,7 @@ const pointsLabel: Record<number, string> = {
   0: 'Way off',
 };
 
-export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, onEndGame, onLeaveGame }: Props) {
+export default function Room({ room, hoverGuess, onLockScore, onSubmitGuess, onSendHover, onNextRound, onEndGame, onLeaveGame }: Props) {
   const { phase, scorerIndex, myPlayerIndex, players, currentPrompt } = room;
   const isScorer = myPlayerIndex === scorerIndex;
   const guesserIndex: 0 | 1 = scorerIndex === 0 ? 1 : 0;
@@ -81,17 +83,42 @@ export default function Room({ room, onLockScore, onSubmitGuess, onNextRound, on
 
           {phase === 'guessing' && currentPrompt && (
             isScorer ? (
-              <div className="text-center py-12 space-y-4">
-                <div className="w-12 h-12 rounded-full border-4 border-violet-500 border-t-transparent animate-spin mx-auto" />
-                <p className="text-slate-300">
-                  <span className="text-violet-400 font-semibold">{guesser?.name}</span> is guessing…
-                </p>
+              <div className="space-y-6">
+                <div className="text-center space-y-4">
+                  <div className="w-12 h-12 rounded-full border-4 border-violet-500 border-t-transparent animate-spin mx-auto" />
+                  <p className="text-slate-300">
+                    <span className="text-violet-400 font-semibold">{guesser?.name}</span> is guessing…
+                  </p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
+                  <div className="flex justify-between items-center gap-4">
+                    <span className="text-red-400 font-semibold text-sm flex-1">{currentPrompt.negative}</span>
+                    <span className="text-slate-600 text-xs">↔</span>
+                    <span className="text-emerald-400 font-semibold text-sm text-right flex-1">{currentPrompt.positive}</span>
+                  </div>
+                  <div className="grid grid-cols-10 gap-1.5">
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                      <div
+                        key={n}
+                        className={`aspect-square rounded-xl font-black text-lg flex items-center justify-center ${
+                          hoverGuess === n ? 'bg-violet-500 text-white' : 'bg-white/5 text-slate-600'
+                        }`}
+                      >
+                        {n}
+                      </div>
+                    ))}
+                  </div>
+                  <p className={`text-center text-slate-400 text-sm ${hoverGuess === null ? 'invisible' : ''}`}>
+                    {guesser?.name?.split(' ')[0]} is considering <span className="text-violet-300 font-semibold">{hoverGuess ?? ''}</span>…
+                  </p>
+                </div>
               </div>
             ) : (
               <GuessPicker
                 prompt={currentPrompt}
                 scorerName={scorer?.name ?? 'Your partner'}
                 onGuess={onSubmitGuess}
+                onHover={onSendHover}
               />
             )
           )}

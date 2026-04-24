@@ -62,9 +62,11 @@ export interface UseRoomReturn {
   room: RoomState | null;
   error: string | null;
   connected: boolean;
+  hoverGuess: number | null;
   join: (roomId: string, playerName: string) => void;
   lockScore: () => void;
   submitGuess: (guess: number) => void;
+  sendHover: (hover: number | null) => void;
   nextRound: () => void;
   endGame: () => void;
   leaveGame: () => void;
@@ -75,6 +77,7 @@ export function useRoom(): UseRoomReturn {
   const [room, setRoom] = useState<RoomState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
+  const [hoverGuess, setHoverGuess] = useState<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const sessionRef = useRef<Session | null>(getSession());
 
@@ -83,12 +86,15 @@ export function useRoom(): UseRoomReturn {
   }, []);
 
   useEffect(() => {
+    let attempts = 0;
+
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const ws = new WebSocket(`${protocol}://${window.location.host}/ws`);
       wsRef.current = ws;
 
       ws.onopen = () => {
+        attempts = 0;
         setConnected(true);
         // Auto-rejoin if a session is stored
         const session = sessionRef.current;
@@ -102,15 +108,20 @@ export function useRoom(): UseRoomReturn {
 
       ws.onclose = () => {
         setConnected(false);
-        // Attempt to reconnect after 2s if we have a session
-        if (sessionRef.current) {
+        // Retry for up to 180 s (90 × 2 s) — after that the server room is gone
+        if (sessionRef.current && attempts++ < 90) {
           setTimeout(connect, 2000);
+        } else {
+          clearSession();
+          sessionRef.current = null;
+          setRoom(null);
         }
       };
 
       ws.onmessage = (event) => {
         const { type, payload } = JSON.parse(event.data);
-        if (type === 'ROOM_STATE') setRoom(payload as RoomState);
+        if (type === 'ROOM_STATE') { setRoom(payload as RoomState); setHoverGuess(null); }
+        if (type === 'HOVER_UPDATE') setHoverGuess((payload as { hover: number | null }).hover);
         if (type === 'ERROR') setError((payload as { message: string }).message);
       };
     }
@@ -154,10 +165,12 @@ export function useRoom(): UseRoomReturn {
     room,
     error,
     connected,
+    hoverGuess,
     clearError: () => setError(null),
     join,
     lockScore: () => send('LOCK_SCORE'),
     submitGuess: (guess) => send('SUBMIT_GUESS', { guess }),
+    sendHover: (hover) => send('HOVER_GUESS', { hover }),
     nextRound: () => send('NEXT_ROUND'),
     endGame: endGameAndClear,
     leaveGame,

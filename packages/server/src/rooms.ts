@@ -204,7 +204,7 @@ export function submitGuess(
   if (room.phase !== 'guessing') return { error: 'Not in guessing phase' };
   const guesserIndex: 0 | 1 = room.scorerIndex === 0 ? 1 : 0;
   if (room.players[guesserIndex]?.id !== playerId) return { error: 'Not your turn to guess' };
-  if (guess < 1 || guess > 10) return { error: 'Guess must be 1–10' };
+  if (typeof guess !== 'number' || !Number.isFinite(guess) || guess < 1 || guess > 10) return { error: 'Guess must be 1–10' };
 
   const points = computePoints(room.lockedScore!, guess);
   room.lastGuess = guess;

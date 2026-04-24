@@ -5,6 +5,7 @@ interface Props {
   prompt: Prompt;
   scorerName: string;
   onGuess: (guess: number) => void;
+  onHover: (hover: number | null) => void;
 }
 
 const numberColors = [
@@ -20,13 +21,14 @@ const numberColors = [
   'from-emerald-500 to-emerald-400',
 ];
 
-export default function GuessPicker({ prompt, scorerName, onGuess }: Props) {
+export default function GuessPicker({ prompt, scorerName, onGuess, onHover }: Props) {
   const [selected, setSelected] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   function handleSubmit() {
     if (selected === null || submitted) return;
     setSubmitted(true);
+    onHover(null);
     onGuess(selected);
   }
 
@@ -50,7 +52,9 @@ export default function GuessPicker({ prompt, scorerName, onGuess }: Props) {
           {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
             <button
               key={n}
-              onClick={() => !submitted && setSelected(n)}
+              onClick={() => { if (!submitted) { setSelected(n); onHover(n); } }}
+              onMouseEnter={() => { if (!submitted && selected === null) onHover(n); }}
+              onMouseLeave={() => { if (!submitted && selected === null) onHover(null); }}
               disabled={submitted}
               className={`aspect-square rounded-xl font-black text-lg transition-all ${
                 selected === n

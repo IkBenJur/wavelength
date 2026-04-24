@@ -137,6 +137,16 @@ wss.on('connection', (ws) => {
       if (result) broadcast(roomId, 'ROOM_STATE', result);
       return;
     }
+
+    if (type === 'HOVER_GUESS') {
+      const hover = typeof payload?.hover === 'number' ? payload.hover : null;
+      for (const [clientWs, clientInfo] of clients) {
+        if (clientInfo.roomId === roomId && clientWs !== ws) {
+          send(clientWs, 'HOVER_UPDATE', { hover });
+        }
+      }
+      return;
+    }
   });
 
   ws.on('close', () => {
